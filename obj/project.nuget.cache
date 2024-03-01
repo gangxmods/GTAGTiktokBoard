@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "iUHK2UMkc+AaN+45idIfQaoUI46WGzI5jnIBuK8GaJ2As1qLY8Ii/Yh8DdeAxTV7094BvKDuwbrEnlU963zkBw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\Shadow\\Downloads\\YouTuberBoard-main\\TTBoard.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Shadow\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512"
+  ],
+  "logs": []
+}
