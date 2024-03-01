@@ -7,5 +7,5 @@ Another button that updates the follower count every time you click it.
 Requirement
 MOST RECENT UTILLA
 
-[Board](https://cdn.discordapp.com/attachments/1191807515080536135/1212941180858277918/ezgif.com-animated-gif-maker.gif?ex=65f3aa80&is=65e13580&hm=9dbef6e8f8f889b531c665331cfc97b43086eeed7bcb798dc8a39068826144e1&)
+[Board](https://cdn.discordapp.com/attachments/1191807515080536135/1212944051826065489/image.png?ex=65f3ad2d&is=65e1382d&hm=e4c40d9091b0d995a3ca73ff8b70d632c425b2421b7ebce364b34e494706fc2c&)
 
