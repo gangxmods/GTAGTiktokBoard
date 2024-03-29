@@ -24,13 +24,13 @@ namespace TTboard
 	[BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
 	public class Plugin : BaseUnityPlugin
 	{
-		public GameObject TTBoard;
+	public GameObject TTBoard;
         private string filePath;
         public string txtcon;
         private bool showWindow = false;
         private string username = "";
         bool allowlivecounter = false;
-        private float updatesecs = 2.5f;
+        private float updatesecs = 3.35f;
         private float timer = 0f;
         public static int followersCount;
         public static bool canUpdate;
