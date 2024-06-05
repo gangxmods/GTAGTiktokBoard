@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Reflection;
 using BepInEx;
@@ -8,9 +8,11 @@ using Utilla;
 using UnityEngine.Networking;
 using Newtonsoft.Json;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Photon.Pun;
+using TTboard;
 
 namespace TTboard
 {
@@ -19,12 +21,12 @@ namespace TTboard
     /// </summary>
 
     /* This attribute tells Utilla to look for [ModdedGameJoin] and [ModdedGameLeave] */
-	[ModdedGamemode]
-	[BepInDependency("org.legoandmars.gorillatag.utilla", "1.5.0")]
-	[BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
-	public class Plugin : BaseUnityPlugin
-	{
-	public GameObject TTBoard;
+    [ModdedGamemode]
+    [BepInDependency("org.legoandmars.gorillatag.utilla", "1.5.0")]
+    [BepInPlugin(PluginInfo.GUID, PluginInfo.Name, PluginInfo.Version)]
+    public class Plugin : BaseUnityPlugin
+    {
+        public static GameObject TTBoard;
         private string filePath;
         public string txtcon;
         private bool showWindow = false;
@@ -36,10 +38,12 @@ namespace TTboard
         public static bool canUpdate;
         public static bool usernameIsalreadySet;
         public static bool inModded = false;
+
         void Start()
-		{
-            /* A lot of Gorilla Tag systems will not be set up when start is called /*
-			/* Put code in OnGameInitialized to avoid null references */
+        {
+            /* A lot of Gorilla Tag systems will not be set up when start is called */
+            /* Put code in OnGameInitialized to avoid null references */
+            LoadAssets();
             filePath = System.IO.Path.Combine(Application.dataPath, "Gtag", "TTUsernameConfig.txt");
             if (File.Exists(filePath))
             {
@@ -52,11 +56,12 @@ namespace TTboard
             }
             Utilla.Events.GameInitialized += OnGameInitialized;
         }
+
         [ModdedGamemodeJoin]
         public void OnJoin(string gamemode)
         {
             /* Activate your mod here */
-            /* This code will run regardless of if the mod is enabled*/
+            /* This code will run regardless of if the mod is enabled */
             TTBoard.SetActive(true);
             inModded = true;
             TTBoard.transform.position = new Vector3(-63.2354f, 11.8859f, -82.111f);
@@ -64,47 +69,46 @@ namespace TTboard
             TTBoard.transform.localScale = new Vector3(.5f, .5f, .5f);
         }
 
-        /* This attribute tells Utilla to call this method when a modded room is left */
         [ModdedGamemodeLeave]
         public void OnLeave(string gamemode)
         {
             /* Deactivate your mod here */
-            /* This code will run regardless of if the mod is enabled*/
+            /* This code will run regardless of if the mod is enabled */
             TTBoard.transform.position = new Vector3(0, 0, 0);
             TTBoard.SetActive(true);
             inModded = false;
         }
+
         void OnEnable()
-		{
-			/* Set up your mod here */
-			/* Code here runs at the start and whenever your mod is enabled*/
+        {
+            /* Set up your mod here */
+            /* Code here runs at the start and whenever your mod is enabled */
+            HarmonyPatches.ApplyHarmonyPatches();
+        }
 
-			HarmonyPatches.ApplyHarmonyPatches();
-		}
-
-		void OnDisable()
-		{
-			/* Undo mod setup here */
-			/* This provides support for toggling mods with ComputerInterface, please implement it :) */
-			/* Code here runs whenever your mod is disabled (including if it disabled on startup)*/
-
-			HarmonyPatches.RemoveHarmonyPatches();
-		}
-
+        void OnDisable()
+        {
+            /* Undo mod setup here */
+            /* This provides support for toggling mods with ComputerInterface, please implement it :) */
+            /* Code here runs whenever your mod is disabled (including if it disabled on startup) */
+            HarmonyPatches.RemoveHarmonyPatches();
+        }
 
         void OnGameInitialized(object sender, EventArgs e)
         {
-            var bundle = LoadAssetBundle("TTBoard.plum");
-            TTBoard = bundle.LoadAsset<GameObject>("TiktokBoard");
-            var T = bundle.LoadAsset<GameObject>("TiktokBoard");
             TTBoard = Instantiate(TTBoard);
             TTBoard.transform.position = new Vector3(0, 0, 0);
             TTBoard.SetActive(true);
-            Username2Followers();
+            StartCoroutine(Username2Followers());
         }
 
+        public static void LoadAssets()
+        {
+            AssetBundle bundle = LoadAssetBundle("TTBoard.plum");
+            TTBoard = bundle.LoadAsset<GameObject>("TiktokBoard");
+        }
 
-        public AssetBundle LoadAssetBundle(string path)
+        public static AssetBundle LoadAssetBundle(string path)
         {
             Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(path);
             AssetBundle bundle = AssetBundle.LoadFromStream(stream);
@@ -128,7 +132,7 @@ namespace TTboard
             }
             if (GUI.Button(new Rect(10, 60, 100, 30), "Update Counter"))
             {
-                Username2Followers();
+                StartCoroutine(Username2Followers());
             }
             if (showWindow)
             {
@@ -148,20 +152,19 @@ namespace TTboard
             {
                 L("Entered Username: " + username);
                 File.WriteAllText(filePath, username);
-                Username2Followers();
+                StartCoroutine(Username2Followers());
                 showWindow = false;
             }
         }
 
-
-        void Username2Followers()
+        IEnumerator Username2Followers()
         {
             txtcon = File.ReadAllText(filePath);
             string url = "https://mixerno.space/api/tiktok-user-counter/user/" + txtcon;
 
             if (string.IsNullOrEmpty(txtcon))
             {
-                GameObject.Find("tttext").GetComponent<TMPro.TMP_Text>().text = "NO ACC";
+                GameObject.Find("tttext").GetComponent<TextMesh>().text = "NO ACC";
                 L("No Account Set! Set with GUI!");
                 usernameIsalreadySet = false;
             }
@@ -169,10 +172,7 @@ namespace TTboard
             {
                 usernameIsalreadySet = true;
                 UnityWebRequest webRequest = UnityWebRequest.Get(url);
-                webRequest.SendWebRequest();
-                while (!webRequest.isDone)
-                {
-                }
+                yield return webRequest.SendWebRequest();
 
                 if (webRequest.result == UnityWebRequest.Result.Success)
                 {
@@ -196,14 +196,14 @@ namespace TTboard
         }
 
         void Update()
-		{
+        {
             timer += Time.deltaTime;
             if (timer >= updatesecs && allowlivecounter)
             {
-                Username2Followers();
+                StartCoroutine(Username2Followers());
                 timer = 0f;
             }
-            if(followersCount == 0 || string.IsNullOrEmpty(txtcon))
+            if (followersCount == 0 || string.IsNullOrEmpty(txtcon))
             {
                 canUpdate = false;
             }
@@ -211,9 +211,9 @@ namespace TTboard
             {
                 canUpdate = true;
             }
-            if(canUpdate)
+            if (canUpdate)
             {
-                GameObject.Find("tttext").GetComponent<TMPro.TMP_Text>().text = $"{txtcon}\n{followersCount}";
+                GameObject.Find("tttext").GetComponent<TextMesh>().text = $"{txtcon.ToUpper()}\n\n{followersCount}";
             }
             if (!PhotonNetwork.InRoom)
             {
@@ -227,8 +227,9 @@ namespace TTboard
                 TTBoard.transform.position = new Vector3(0, 0, 0);
             }
         }
-	}
+    }
 }
+
 public class MixernoUserData
 {
     public long t { get; set; }
