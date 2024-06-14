@@ -75,7 +75,7 @@ namespace TTboard
             /* Deactivate your mod here */
             /* This code will run regardless of if the mod is enabled */
             TTBoard.transform.position = new Vector3(0, 0, 0);
-            TTBoard.SetActive(true);
+            TTBoard.SetActive(false);
             inModded = false;
         }
 
